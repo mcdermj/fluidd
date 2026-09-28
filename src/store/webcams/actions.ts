@@ -50,7 +50,7 @@ export const actions = {
           flipY: legacyCamera.flipY ?? false,
           rotation: legacyCamera.rotate ? +legacyCamera.rotate as Moonraker.Webcam.Rotation : 0,
           aspectRatio: '4:3',
-          extraData: {}
+          extra_data: {}
         }
 
         await SocketActions.serverDatabasePostItem(legacyCamera.id, webcam, Globals.MOONRAKER_DB.webcams.NAMESPACE)
