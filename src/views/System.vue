@@ -10,7 +10,7 @@
 
       <disk-usage-card class="mb-2 mb-md-4" />
 
-      <moonraker-database-card />
+      <moonraker-database-card v-if="databaseListSupported" />
     </v-col>
 
     <v-col
@@ -64,6 +64,10 @@ export default class Configure extends Mixins(StateMixin) {
 
   get mcus (): MCU[] {
     return this.$typedGetters['printer/getMcus']
+  }
+
+  get databaseListSupported (): boolean {
+    return this.$typedState.database.listSupported
   }
 }
 </script>

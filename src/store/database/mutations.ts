@@ -12,6 +12,10 @@ export const mutations = {
     state.info = payload
   },
 
+  setListUnsupported (state) {
+    state.listSupported = false
+  },
+
   setServerDatabasePostBackup (state, payload: { backup_path: string }) {
     if (state.info?.backups) {
       const { filename } = getFilePaths(payload.backup_path)

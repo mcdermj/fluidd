@@ -1,4 +1,4 @@
-import { isSocketError, isMoonrakerNotFoundError, isMoonrakerUnauthorizedError } from '../is-socket-error'
+import { isSocketError, isMoonrakerNotFoundError, isMoonrakerUnauthorizedError, isMoonrakerUnimplementedError } from '../is-socket-error'
 
 const error = (code: number) => ({ code, message: 'error' })
 
@@ -40,5 +40,16 @@ describe('isMoonrakerNotFoundError', () => {
     [503, false]
   ])('Expects code %i to be %s', (code, expected) => {
     expect(isMoonrakerNotFoundError(error(code))).toBe(expected)
+  })
+})
+
+describe('isMoonrakerUnimplementedError', () => {
+  it.each([
+    [403, 'Method unimplemented', true],
+    [403, 'Namespace \'moonraker\' is forbidden', false],
+    [-32601, 'Method unimplemented', false],
+    [500, 'Method unimplemented', false]
+  ])('Expects code %i with message "%s" to be %s', (code, message, expected) => {
+    expect(isMoonrakerUnimplementedError({ code, message })).toBe(expected)
   })
 })
