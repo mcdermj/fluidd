@@ -43,6 +43,13 @@ export const actions = {
         ))
         .filter(promise => promise)
 
+      if (
+        !payload.components.includes(Globals.MOONRAKER_COMPONENTS.webcams.name) &&
+        payload.components.includes(Globals.MOONRAKER_COMPONENTS.database.name)
+      ) {
+        promises.push(dispatch('webcams/initFromDatabase', undefined, { root: true }))
+      }
+
       await Promise.all(promises)
     }
   },

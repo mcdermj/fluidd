@@ -40,5 +40,5 @@ export interface DatabaseWebcamConfig {
   flipY: boolean;
   rotation: Moonraker.Webcam.Rotation;
   aspectRatio: string;
-  extraData: Record<string, unknown>;
+  extra_data: Record<string, unknown>;
 }
