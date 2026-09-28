@@ -1,5 +1,6 @@
 export interface DatabaseState {
   info: DatabaseInfo | null;
+  listSupported: boolean;
 }
 
 export interface DatabaseInfo {

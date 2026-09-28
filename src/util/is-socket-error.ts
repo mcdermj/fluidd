@@ -29,3 +29,10 @@ export const isMoonrakerUnauthorizedError = (error: SocketError): boolean => (
 export const isMoonrakerNotFoundError = (error: SocketError): boolean => (
   error.code === JsonRpcErrorCode.MethodNotFound
 )
+
+// Creality's Moonraker answers some methods it stubs out this way; Moonraker's
+// own 403s (e.g. a forbidden database namespace) carry other messages
+export const isMoonrakerUnimplementedError = (error: SocketError): boolean => (
+  error.code === 403 &&
+  error.message === 'Method unimplemented'
+)
