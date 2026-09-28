@@ -124,10 +124,12 @@
         <v-divider />
       </template>
 
-      <app-setting :title="$t('app.setting.label.camera_url_stream')">
+      <app-setting
+        v-if="camera.service === 'webrtc-creality'"
+        :title="$t('app.setting.label.camera_printer_host')"
+      >
         <v-text-field
-          v-model="camera.stream_url"
-          type="url"
+          v-model="crealityHost"
           spellcheck="false"
           class="mt-5"
           filled
@@ -135,28 +137,47 @@
           single-line
           hide-details="auto"
           :rules="[
-            $rules.required
+            $rules.required,
+            crealityHostValid
           ]"
         />
       </app-setting>
 
-      <v-divider />
+      <template v-else>
+        <app-setting :title="$t('app.setting.label.camera_url_stream')">
+          <v-text-field
+            v-model="camera.stream_url"
+            type="url"
+            spellcheck="false"
+            class="mt-5"
+            filled
+            dense
+            single-line
+            hide-details="auto"
+            :rules="[
+              $rules.required
+            ]"
+          />
+        </app-setting>
 
-      <app-setting :title="$t('app.setting.label.camera_url_snapshot')">
-        <v-text-field
-          v-model="camera.snapshot_url"
-          type="url"
-          spellcheck="false"
-          class="mt-5"
-          filled
-          dense
-          single-line
-          hide-details="auto"
-          :rules="[
-            $rules.required
-          ]"
-        />
-      </app-setting>
+        <v-divider />
+
+        <app-setting :title="$t('app.setting.label.camera_url_snapshot')">
+          <v-text-field
+            v-model="camera.snapshot_url"
+            type="url"
+            spellcheck="false"
+            class="mt-5"
+            filled
+            dense
+            single-line
+            hide-details="auto"
+            :rules="[
+              $rules.required
+            ]"
+          />
+        </app-setting>
+      </template>
 
       <template v-if="camera.service === 'iframe'">
         <v-divider />
@@ -185,7 +206,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, VModel } from 'vue-property-decorator'
+import { Component, Vue, Prop, VModel, Watch } from 'vue-property-decorator'
+import { crealityWebrtcHost, crealityWebrtcStreamUrl, isCrealityWebrtcStreamUrl } from '@/util/creality-webrtc-url'
 
 @Component({})
 export default class CameraConfigDialog extends Vue {
@@ -195,7 +217,43 @@ export default class CameraConfigDialog extends Vue {
   @Prop({ type: Object, required: true })
   readonly camera!: Moonraker.Webcam.Entry
 
+  crealityHost = ''
+
+  created () {
+    if (this.camera.service === 'webrtc-creality') {
+      this.initCrealityHost()
+    }
+  }
+
+  @Watch('camera.service')
+  onServiceChanged (service: Moonraker.Webcam.Service) {
+    if (service === 'webrtc-creality') {
+      this.initCrealityHost()
+    }
+  }
+
+  get moonrakerHost (): string {
+    return new URL(this.$typedState.config.apiUrl || document.URL).hostname
+  }
+
+  initCrealityHost () {
+    const streamUrl = this.camera.stream_url ?? ''
+
+    this.crealityHost = isCrealityWebrtcStreamUrl(streamUrl)
+      ? crealityWebrtcHost(streamUrl)
+      : this.moonrakerHost
+  }
+
+  crealityHostValid (value: string) {
+    return crealityWebrtcStreamUrl(value) !== '' || this.$t('app.general.simple_form.error.invalid_host')
+  }
+
   handleSave () {
+    if (this.camera.service === 'webrtc-creality') {
+      this.camera.stream_url = crealityWebrtcStreamUrl(this.crealityHost)
+      this.camera.snapshot_url = ''
+    }
+
     this.$emit('save', this.camera)
     this.open = false
   }
