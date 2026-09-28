@@ -4,6 +4,10 @@ import type { RootState } from '../types'
 import { SocketActions } from '@/api/socketActions'
 import setUrlQueryParam from '@/util/set-url-query-param'
 import { Globals } from '@/globals'
+import { v4 as uuidv4 } from 'uuid'
+import { fromDatabaseWebcams, toDatabaseWebcam } from '@/util/webcam-database'
+import { isMoonrakerNotFoundError } from '@/util/is-socket-error'
+import { consola } from 'consola'
 
 const legacyCameraTypeToWebcamService: Record<LegacyCameraType, Moonraker.Webcam.Service> = {
   mjpgstream: 'mjpegstreamer',
@@ -24,6 +28,20 @@ export const actions = {
 
   async init () {
     SocketActions.serverWebcamsList()
+  },
+
+  async initFromDatabase ({ commit }) {
+    try {
+      const response = await SocketActions.serverDatabaseGetItem<Record<string, unknown>>(
+        undefined,
+        Globals.MOONRAKER_DB.webcams.NAMESPACE,
+        { suppressError: isMoonrakerNotFoundError }
+      )
+
+      commit('setWebcamsList', { webcams: fromDatabaseWebcams(response.value ?? {}) })
+    } catch (e) {
+      consola.debug('[webcams] error reading webcams namespace', e)
+    }
   },
 
   async initWebcams ({ commit }, payload: { activeWebcam?: string }) {
@@ -60,16 +78,35 @@ export const actions = {
     }
   },
 
-  async updateWebcam ({ commit }, payload: Moonraker.Webcam.Entry) {
-    commit('setUpdateWebcam', payload)
+  async updateWebcam ({ commit, rootGetters }, payload: Moonraker.Webcam.Entry) {
+    if (rootGetters['server/componentSupport'](Globals.MOONRAKER_COMPONENTS.webcams.name)) {
+      commit('setUpdateWebcam', payload)
 
-    SocketActions.serverWebcamsWrite(payload)
+      SocketActions.serverWebcamsWrite(payload)
+
+      return
+    }
+
+    const webcam: Moonraker.Webcam.Entry = {
+      ...payload,
+      // Not crypto.randomUUID(): it is missing on plain-HTTP pages, where Fluidd usually runs
+      uid: payload.uid || uuidv4(),
+      source: 'database'
+    }
+
+    commit('setUpdateWebcam', webcam)
+
+    SocketActions.serverDatabasePostItem(webcam.uid, toDatabaseWebcam(webcam), Globals.MOONRAKER_DB.webcams.NAMESPACE)
   },
 
-  async removeWebcam ({ commit }, payload: string) {
+  async removeWebcam ({ commit, rootGetters }, payload: string) {
     commit('setRemoveWebcam', payload)
 
-    SocketActions.serverWebcamsDelete(payload)
+    if (rootGetters['server/componentSupport'](Globals.MOONRAKER_COMPONENTS.webcams.name)) {
+      SocketActions.serverWebcamsDelete(payload)
+    } else {
+      SocketActions.serverDatabaseDeleteItem(payload, Globals.MOONRAKER_DB.webcams.NAMESPACE)
+    }
   },
 
   async updateActiveWebcam ({ commit, state }, payload: string) {
