@@ -19,6 +19,7 @@ The current supported types are:
 | **WebRTC (camera-streamer)** | Highly bandwidth-efficient stream. Currently only available on Raspberry devices.                                              |
 | **WebRTC (go2rtc)**          | Loads a WebRTC stream from go2rtc.                                                                                             |
 | **WebRTC (MediaMTX)**        | Loads a WebRTC stream from MediaMTX.                                                                                           |
+| **WebRTC (Creality)**        | Loads the stock camera stream from Creality K1-series printers.                                                                |
 | **IP Camera**                | Experimental — replaces the `<img>` tag with a `<video>` tag. Use only if your URL supports native HTML5 video.                |
 | **HTTP Page**                | Loads a website in place of the camera feed. Use for embedding video feeds not supported by the other methods.                 |
 
@@ -40,6 +41,12 @@ Not sure which type to use? Here's a quick guide:
   is not available.
 - **WebRTC (MediaMTX)** — similar to go2rtc. Useful if you already run
   [MediaMTX](https://github.com/bluenviron/mediamtx) for other purposes.
+- **WebRTC (Creality)** — for the stock camera on Creality K1-series
+  printers, which is only available as WebRTC. Set the stream URL to
+  `http://<printer>:8000/call/webrtc_local`. Fluidd must be served over
+  HTTP, not HTTPS, because the printer's camera endpoint is HTTP only.
+  The browser also needs internet access: the connection is negotiated
+  through a public STUN server, as in Creality's own camera page.
 - **HLS Stream** — delivers high-resolution video with moderate latency.
   Suitable for high-quality monitoring where a few seconds of delay is
   acceptable.
