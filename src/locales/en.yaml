@@ -534,6 +534,7 @@ app:
         exists: Already exists
         invalid_number: Invalid Number
         invalid_url: Invalid URL
+        invalid_host: Invalid host
         invalid_expression: Invalid Expression
         max: Max %{max}
         min: Min %{min}
@@ -774,6 +775,7 @@ app:
         title: Fullscreen action
         embed: Embed
         rawstream: Raw stream
+      camera_printer_host: Printer host
       camera_rotate_by: Rotate by
       camera_stream_type: Stream type
       camera_url_snapshot: Camera Url Snapshot

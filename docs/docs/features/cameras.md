@@ -42,9 +42,10 @@ Not sure which type to use? Here's a quick guide:
 - **WebRTC (MediaMTX)** — similar to go2rtc. Useful if you already run
   [MediaMTX](https://github.com/bluenviron/mediamtx) for other purposes.
 - **WebRTC (Creality)** — for the stock camera on Creality K1-series
-  printers, which is only available as WebRTC. Set the stream URL to
-  `http://<printer>:8000/call/webrtc_local`. Fluidd must be served over
-  HTTP, not HTTPS, because the printer's camera endpoint is HTTP only.
+  printers, which is only available as WebRTC. Set the printer host to
+  the printer's hostname or IP address; it defaults to the host Fluidd
+  connects to for Moonraker. Fluidd must be served over HTTP, not
+  HTTPS, because the printer's camera endpoint is HTTP only.
   The browser also needs internet access: the connection is negotiated
   through a public STUN server, as in Creality's own camera page.
 - **HLS Stream** — delivers high-resolution video with moderate latency.
